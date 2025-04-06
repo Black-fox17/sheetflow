@@ -39,6 +39,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, "api/core/dependencies/email/templates")
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
+    "http://localhost:5173"
 ]
 
 
