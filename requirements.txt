@@ -13,3 +13,4 @@ uuid7
 psycopg2
 passlib
 bcrypt
+alembic
