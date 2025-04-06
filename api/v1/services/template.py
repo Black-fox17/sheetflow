@@ -20,28 +20,57 @@ class TemplateService(Service):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
     def create(self,db: Session, schema: template.TemplateCreate):
         """Create a new template"""
-        if db.query(Template).filter(Template.template_id == schema.template_id).first():
-            raise HTTPException(status_code=400, detail="Template with this template_id already exists")
+        # Generate a unique template_id
+        template_id = self.generate_template_id()
+        
+        # Check if template_id already exists (unlikely but possible)
+        while db.query(Template).filter(Template.template_id == template_id).first():
+            template_id = self.generate_template_id()
+            
         template = Template(
-            template_id=self.generate_template_id(),
+            template_id=template_id,
         )
         db.add(template)
-        for sheet in schema.sheets:
+        for single_sheet in schema.sheets:
             sheet = Sheet(
-                sheet_no=sheet.sheet_no,
-                sheet_name=sheet.sheet_name,
+                sheet_no=single_sheet.sheet_no,
+                sheet_name=single_sheet.sheet_name,
                 template_id=template.template_id,
             )
             db.add(sheet)
-            for column in sheet.columns:
+            for column in single_sheet.columns:
                 column = Column(
                     template_id=template.template_id,
                     name=column.name,
                     type=column.type,
                     required=column.required,
-                    sheet_no=sheet.sheet_no,
+                    sheet_no=single_sheet.sheet_no,
                 )
                 db.add(column)
+        db.commit()
+        db.refresh(template)
+        return template
+    def delete(self, db: Session, template_id: str):
+        """Delete a template"""
+        template = check_model_existence(db, Template, Template.template_id, template_id)
+        db.delete(template)
+        db.commit()
+        return template
+
+    def fetch(self, db: Session, template_id: str):
+        """Fetch a template by id"""
+        template = check_model_existence(db, Template, Template.template_id, template_id)
+        return template
+
+    def fetch_all(self, db: Session):
+        """Fetch all templates"""
+        return db.query(Template).order_by(desc(Template.created_at)).all()
+
+    def update(self, db: Session, template_id: str, schema: template.TemplateUpdate):
+        """Update a template"""
+        template = check_model_existence(db, Template, Template.template_id, template_id)
+        for key, value in schema.dict(exclude_unset=True).items():
+            setattr(template, key, value)
         db.commit()
         db.refresh(template)
         return template

@@ -17,3 +17,11 @@ class Sheet(BaseModel):
 class TemplateCreate(BaseModel):
     """Schema to create a template"""
     sheets: List[Sheet]
+
+class TemplateUpdate(BaseModel):
+    """Schema to update a template"""
+    sheets: List[Sheet]
+
+class TemplateDelete(BaseModel):
+    """Schema to delete a template"""
+    template_id: str

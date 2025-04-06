@@ -2,6 +2,7 @@ from api.v1.models.base_model import BaseTableModel
 from uuid_extensions import uuid7
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, text, Boolean, Index, ForeignKey, Numeric, ARRAY
+from sqlalchemy.orm import foreign, remote
 
 class Sheet(BaseTableModel):
     __tablename__ = "sheets"
@@ -11,4 +12,9 @@ class Sheet(BaseTableModel):
     sheet_name = Column(String, nullable=False)
 
     template = relationship("Template", back_populates="sheets")
-    columns = relationship("Column", back_populates="sheet", cascade="all, delete-orphan")
+    # Define a one-to-many relationship with Column
+    columns = relationship(
+        "Column",
+        back_populates="sheet",
+        cascade="all, delete-orphan"
+    )
