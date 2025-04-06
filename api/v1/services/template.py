@@ -14,10 +14,11 @@ from api.db.database import get_db
 from api.utils.db_validators import check_model_existence
 from api.v1.models import Template, Sheet, Column
 from api.v1.schemas import template
+from uuid_extensions import uuid7
 class TemplateService(Service):
     """Template service"""
     def generate_template_id(self):
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        return str(uuid7())
     def create(self,db: Session, schema: template.TemplateCreate):
         """Create a new template"""
         # Generate a unique template_id
