@@ -45,7 +45,7 @@ async def create_template(
         created_template = template_service.create(db, template_data)
         return success_response(
             status_code=status.HTTP_201_CREATED,
-            data=created_template, 
+            id=created_template, 
             message="Template created successfully"
         )
     except Exception as e:

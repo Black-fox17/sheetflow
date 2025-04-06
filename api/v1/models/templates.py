@@ -9,3 +9,4 @@ class Template(BaseTableModel):
     
     sheets = relationship("Sheet", back_populates="template", cascade="all, delete-orphan")
     columns = relationship("Column", back_populates="template", cascade="all, delete-orphan")
+    rows = relationship("Row", back_populates="template", cascade="all, delete-orphan")

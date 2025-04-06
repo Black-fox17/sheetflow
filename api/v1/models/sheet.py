@@ -18,3 +18,9 @@ class Sheet(BaseTableModel):
         back_populates="sheet",
         cascade="all, delete-orphan"
     )
+    # Define a one-to-many relationship with Row
+    rows = relationship(
+        "Row",
+        back_populates="sheet",
+        cascade="all, delete-orphan"
+    )
