@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from fastapi import Depends, APIRouter, status, HTTPException, Request
+from fastapi import Depends, APIRouter, status, HTTPException
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.schemas import row
@@ -10,16 +10,11 @@ row_router = APIRouter(prefix="/rows", tags=["Rows"])
 
 @row_router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_row(
-    request: Request,
+    row_data: row.RowCreate,
     db: Annotated[Session, Depends(get_db)]
 ):
     """Create a new row"""
     try:
-        body = await request.json()
-        
-        # Create a RowCreate object from the body
-        row_data = row.RowCreate(**body)
-
         created_row = row_service.create(db, row_data)
         return success_response(
             status_code=status.HTTP_201_CREATED,
