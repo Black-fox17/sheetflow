@@ -1,5 +1,5 @@
 from typing import Annotated, List
-from fastapi import Depends, APIRouter, status, HTTPException
+from fastapi import Depends, APIRouter, status, HTTPException, Request
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.schemas import row
@@ -10,16 +10,47 @@ row_router = APIRouter(prefix="/rows", tags=["Rows"])
 
 @row_router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_row(
-    row_data: row.RowCreate,
+    request: Request,
     db: Annotated[Session, Depends(get_db)]
 ):
     """Create a new row"""
     try:
+        body = await request.json()
+        
+        # Create a RowCreate object from the body
+        row_data = row.RowCreate(**body)
+
         created_row = row_service.create(db, row_data)
         return success_response(
             status_code=status.HTTP_201_CREATED,
             data=created_row,
             message="Row created successfully"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@row_router.post("/batch", status_code=status.HTTP_201_CREATED)
+async def create_rows_batch(
+    row_data: row.RowData,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """Create multiple rows in a batch"""
+    try:
+        created_rows = []
+        for row_item in row_data.data:
+            # Set the template_id from the parent object if not provided in the row
+            if not row_item.template_id:
+                row_item.template_id = row_data.template_id
+            created_row = row_service.create(db, row_item)
+            created_rows.append(created_row)
+        
+        return success_response(
+            status_code=status.HTTP_201_CREATED,
+            data=created_rows,
+            message=f"{len(created_rows)} rows created successfully"
         )
     except Exception as e:
         raise HTTPException(
@@ -66,24 +97,6 @@ async def delete_row(
             detail=str(e)
         )
 
-@row_router.get("/{row_id}", status_code=status.HTTP_200_OK)
-async def get_row(
-    row_id: str,
-    db: Annotated[Session, Depends(get_db)]
-):
-    """Get a row by id"""
-    try:
-        row = row_service.fetch(db, row_id)
-        return success_response(
-            status_code=status.HTTP_200_OK,
-            data=row,
-            message="Row fetched successfully"
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
-        )
 
 @row_router.get("/sheet/{template_id}/{sheet_no}", status_code=status.HTTP_200_OK)
 async def get_rows_by_sheet(

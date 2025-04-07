@@ -53,3 +53,21 @@ async def create_template(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+@template_router.get("/{template_id}", status_code=status.HTTP_200_OK)
+async def get_template(
+    template_id: str,
+    db: Annotated[Session, Depends(get_db)]
+):
+    """Get a row by id"""
+    try:
+        row = template_service.fetch(db, template_id)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            data=row,
+            message="Row fetched successfully"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
