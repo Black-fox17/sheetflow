@@ -85,4 +85,11 @@ def generate_mock_excel(filename: str = "mock_data.xlsx"):
     return filename
 
 if __name__ == "__main__":
-    generate_mock_excel()
+    # generate_mock_excel()
+    data = {
+        "Age": "32",
+        "Name": "Johnny",
+        "Home price": "20000"
+        }
+    keys = list(data.keys())
+    print(keys)

@@ -7,6 +7,7 @@ from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models import Row, Sheet, Template, Column
 from api.v1.schemas import row
+from collections import defaultdict
 
 class RowService(Service):
     """Row service"""
@@ -125,11 +126,36 @@ class RowService(Service):
         
         return row
 
+
     def fetch(self, db: Session, template_id: str):
-        """Fetch all rows for a template"""
-        rows = db.query(Row).filter(Row.template_id == template_id).all()
-        return rows
-    
+        """Fetch all rows for a template, structured by sheet name"""
+        sheets = db.query(Sheet).filter(Sheet.template_id == template_id).all()
+
+        # Map sheet_no to sheet_name
+        sheet_map = {sheet.sheet_no: sheet.sheet_name for sheet in sheets}
+
+        # Final result dictionary
+        result = {}
+
+        for sheet_no, sheet_name in sheet_map.items():
+            rows_by_sheet = db.query(Row).filter(
+                Row.template_id == template_id,
+                Row.sheet_no == sheet_no
+            ).all()
+
+            rows_data = [row.data for row in rows_by_sheet]
+
+            structured_data = defaultdict(list)
+
+            for entry in rows_data:
+                for key, value in entry.items():
+                    structured_data[key].append(value)
+
+            # Store under the sheet name
+            result[sheet_name] = dict(structured_data)
+
+        return result
+
     def fetch_by_sheet(self, db: Session, template_id: str, sheet_no: int):
         """Fetch all rows for a sheet"""
         # Check if template exists
@@ -163,4 +189,4 @@ class RowService(Service):
     def fetch_all(self):
         return super().fetch_all()
 
-row_service = RowService() 
+row_service = RowService()
