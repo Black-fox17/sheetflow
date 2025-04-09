@@ -50,7 +50,7 @@ class TemplateService(Service):
                 db.add(column)
         db.commit()
         db.refresh(template)
-        return template
+        return template_id
     def delete(self, db: Session, template_id: str):
         """Delete a template"""
         template = check_model_existence(db, Template, Template.template_id, template_id)

@@ -34,18 +34,18 @@ async def create_rows_batch(
 ):
     """Create multiple rows in a batch"""
     try:
-        created_rows = []
-        for row_item in row_data.data:
-            # Set the template_id from the parent object if not provided in the row
-            if not row_item.template_id:
-                row_item.template_id = row_data.template_id
-            created_row = row_service.create(db, row_item)
-            created_rows.append(created_row)
+        # created_rows = []
+        # for row_item in row_data.data:
+        #     # Set the template_id from the parent object if not provided in the row
+        #     if not row_item.template_id:
+        #         row_item.template_id = row_data.template_id
+        #     created_row = row_service.create(db, row_item)
+        #     created_rows.append(created_row)
+        created_rows_response = row_service.create_rows_batch(db, row_data)
         
         return success_response(
             status_code=status.HTTP_201_CREATED,
-            data=created_rows,
-            message=f"{len(created_rows)} rows created successfully"
+            message= created_rows_response
         )
     except Exception as e:
         raise HTTPException(

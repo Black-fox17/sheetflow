@@ -1,10 +1,34 @@
 {
-    "template_id": "template-123",
-    "sheet_no": 1,
-    "row_number": 1,
-    "data": {
-      "Full Name": "John Doe",
-      "Email": "john@example.com",
-      "Date of Birth": "1990-01-01"
-    }
-  }
+  "sheets": [
+      {
+          "sheet_no": 1,
+          "sheet_name": "Sheet 1",
+          "columns": [
+              {
+                  "name": "Active",
+                  "type": "text",
+                  "required": false,
+                  "sheet_no": 1
+              },
+              {
+                  "name": "Malignant",
+                  "type": "text",
+                  "required": false,
+                  "sheet_no": 1
+              }
+          ]
+      },
+      {
+          "sheet_no": 2,
+          "sheet_name": "Sheet 2",
+          "columns": [
+              {
+                  "name": "New Column",
+                  "type": "text",
+                  "required": false,
+                  "sheet_no": 2
+              }
+          ]
+      }
+  ]
+}

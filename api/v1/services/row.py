@@ -33,24 +33,20 @@ class RowService(Service):
                 detail=f"Sheet with number {schema.sheet_no} not found in template {schema.template_id}"
             )
         
-        # Check if row number already exists
-        existing_row = db.query(Row).filter(
+        # Get the last row number for this sheet
+        last_row = db.query(Row).filter(
             Row.template_id == schema.template_id,
-            Row.sheet_no == schema.sheet_no,
-            Row.row_number == schema.row_number
-        ).first()
+            Row.sheet_no == schema.sheet_no
+        ).order_by(desc(Row.row_number)).first()
         
-        if existing_row:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Row number {schema.row_number} already exists in sheet {schema.sheet_no}"
-            )
+        # Set row number to last + 1, or 1 if no existing rows
+        row_number = 1 if not last_row else last_row.row_number + 1
         
         # Create new row
         new_row = Row(
             template_id=schema.template_id,
             sheet_no=schema.sheet_no,
-            row_number=schema.row_number,
+            row_number=row_number,
             data=schema.data
         )
         
@@ -59,7 +55,45 @@ class RowService(Service):
         db.refresh(new_row)
         
         return new_row
-    
+
+    def create_rows_batch(self, db: Session, schema: row.RowData):
+        template = db.query(Template).filter(Template.template_id == schema.template_id).first()
+        if not template:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Template with ID {schema.template_id} not found"
+            )
+        sheet = db.query(Sheet).filter(
+            Sheet.template_id == schema.template_id,
+            Sheet.sheet_no == schema.sheet_no
+        ).first()
+        
+        if not sheet:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Sheet with number {schema.sheet_no} not found in template {schema.template_id}"
+            )
+        last_row = db.query(Row).filter(
+            Row.template_id == schema.template_id,
+            Row.sheet_no == schema.sheet_no
+        ).order_by(desc(Row.row_number)).first()
+        row_number = 1 if not last_row else last_row.row_number + 1
+        successful_rows_added = 0
+        for row in schema.rows:
+            if row:
+                new_row = Row(
+                    template_id=schema.template_id,
+                    sheet_no=schema.sheet_no,
+                    row_number=row_number,
+                    data= row.data
+                )
+                row_number += 1
+                successful_rows_added += 1
+                db.add(new_row)
+        db.commit()
+        db.refresh(new_row)
+        return f"Rows Data of length {successful_rows_added} successfully added"
+
     def update(self, db: Session, row_id: str, schema: row.RowUpdate):
         """Update a row"""
         row = db.query(Row).filter(Row.row_id == row_id).first()

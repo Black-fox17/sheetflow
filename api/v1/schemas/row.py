@@ -7,11 +7,16 @@ class RowCreate(BaseModel):
     sheet_no: int
     row_number: int
     data: Dict[str, Any]
-
+class RowBatch(BaseModel):
+    """Schema for what rows data look like"""
+    data: Dict[str, Any]
+    
 class RowData(BaseModel):
     """Schema to create multiple rows"""
     template_id: str
-    data: List[RowCreate]
+    sheet_no: int
+    rows: List[RowBatch]
+
 
 class RowUpdate(BaseModel):
     """Schema to update a row"""
