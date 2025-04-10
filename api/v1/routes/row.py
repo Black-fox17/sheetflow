@@ -56,7 +56,7 @@ async def create_rows_batch(
             detail=str(e)
         )
 
-@row_router.post("/excel_download", status_code=status.HTTP_201_CREATED)
+@row_router.get("/excel_download/{template_id}", status_code=status.HTTP_201_CREATED)
 async def download_excel_file(
     template_id: str,
     db: Annotated[Session, Depends(get_db)]):
