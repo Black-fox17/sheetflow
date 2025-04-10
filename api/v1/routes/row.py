@@ -5,6 +5,9 @@ from api.utils.success_response import success_response
 from api.v1.schemas import row
 from api.v1.services.row import row_service
 from api.db.database import get_db
+from api.utils.generate_excel import generate_db_excel
+from fastapi.responses import FileResponse
+from datetime import datetime
 
 row_router = APIRouter(prefix="/rows", tags=["Rows"])
 
@@ -46,6 +49,30 @@ async def create_rows_batch(
         return success_response(
             status_code=status.HTTP_201_CREATED,
             message= created_rows_response
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+@row_router.post("/excel_download", status_code=status.HTTP_201_CREATED)
+async def download_excel_file(
+    template_id: str,
+    db: Annotated[Session, Depends(get_db)]):
+    try:
+        # Generate a unique filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"template_{template_id}_{timestamp}.xlsx"
+        
+        # Generate the Excel file
+        file_path = generate_db_excel(db, template_id, filename)
+        
+        # Return the file as a downloadable response
+        return FileResponse(
+            path=file_path,
+            filename=filename,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     except Exception as e:
         raise HTTPException(
