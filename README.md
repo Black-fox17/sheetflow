@@ -1,36 +1,38 @@
-# **FASTAPI Boilerplate**  
-A FastAPI boilerplate for efficient project setup.  
+# **SheetFlow Backend**  
+A FastAPI backend for managing spreadsheet templates, sheets, and data with Excel export functionality.
+
+## **Project Overview**  
+SheetFlow is a powerful spreadsheet management system that allows users to:
+- Create and manage templates with multiple sheets
+- Define columns with different data types and requirements
+- Add, update, and delete rows of data
+- Export data to Excel files with proper formatting
 
 ## **Cloning the Repository**  
 
 1. **Fork the repository** and clone it:  
    ```sh
-   git clone https://github.com/<username>/hng_boilerplate_python_fastapi_web.git
+   git clone https://github.com/<username>/sheetflow-backend.git
    ```
 2. **Navigate into the project directory**:  
    ```sh
-   cd hng_boilerplate_python_fastapi_web
+   cd sheetflow-backend
    ```
-3. **Switch to the development branch** (if not already on `dev`):  
-   ```sh
-   git checkout dev
-   ```
-
 
 ## **Setup Instructions**  
 
 1. **Create a virtual environment**:  
    ```sh
-   python3 -m venv .venv
+   python3 -m venv venv
    ```
 2. **Activate the virtual environment**:  
    - On macOS/Linux:  
      ```sh
-     source .venv/bin/activate
+     source venv/bin/activate
      ```
    - On Windows (PowerShell):  
      ```sh
-     .venv\Scripts\Activate
+     venv\Scripts\Activate
      ```
 3. **Install project dependencies**:  
    ```sh
@@ -60,41 +62,41 @@ When setting up the database, you need to replace **placeholders** with your act
 CREATE USER user WITH PASSWORD 'your_password';
 ```
 🔹 **Replace:**  
-- `user` → Your **preferred database username** (e.g., `fastapi_user`).  
+- `user` → Your **preferred database username** (e.g., `sheetflow_user`).  
 - `'your_password'` → A **secure password** for the user (e.g., `'StrongP@ssw0rd'`).  
 
 ✅ **Example:**  
 ```sql
-CREATE USER fastapi_user WITH PASSWORD 'StrongP@ssw0rd';
+CREATE USER sheetflow_user WITH PASSWORD 'StrongP@ssw0rd';
 ```
 
 ---
 
 ## **Step 2: Create the Database**
 ```sql
-CREATE DATABASE hng_fast_api;
+CREATE DATABASE sheetflow_db;
 ```
 🔹 **Replace:**  
-- `hng_fast_api` → Your **preferred database name** (e.g., `fastapi_db`).  
+- `sheetflow_db` → Your **preferred database name**.  
 
 ✅ **Example:**  
 ```sql
-CREATE DATABASE fastapi_db;
+CREATE DATABASE sheetflow_db;
 ```
 
 ---
 
 ## **Step 3: Grant Permissions**
 ```sql
-GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
+GRANT ALL PRIVILEGES ON DATABASE sheetflow_db TO user;
 ```
 🔹 **Replace:**  
-- `hng_fast_api` → The **database name you used** in Step 2.  
+- `sheetflow_db` → The **database name you used** in Step 2.  
 - `user` → The **username you created** in Step 1.  
 
 ✅ **Example:**  
 ```sql
-GRANT ALL PRIVILEGES ON DATABASE fastapi_db TO fastapi_user;
+GRANT ALL PRIVILEGES ON DATABASE sheetflow_db TO sheetflow_user;
 ```
 
 ---
@@ -103,16 +105,16 @@ GRANT ALL PRIVILEGES ON DATABASE fastapi_db TO fastapi_user;
 Edit the `.env` file to match your setup.
 
 ```env
-DATABASE_URL=postgresql://user:your_password@localhost/hng_fast_api
+DATABASE_URL=postgresql://user:your_password@localhost/sheetflow_db
 ```
 🔹 **Replace:**  
 - `user` → Your **database username**.  
 - `your_password` → Your **database password**.  
-- `hng_fast_api` → Your **database name**.  
+- `sheetflow_db` → Your **database name**.  
 
 ✅ **Example:**  
 ```env
-DATABASE_URL=postgresql://fastapi_user:StrongP@ssw0rd@localhost/fastapi_db
+DATABASE_URL=postgresql://sheetflow_user:StrongP@ssw0rd@localhost/sheetflow_db
 ```
 
 ---
@@ -121,15 +123,15 @@ DATABASE_URL=postgresql://fastapi_user:StrongP@ssw0rd@localhost/fastapi_db
 After setting up the database, test the connection:
 
 ```sh
-psql -U user -d hng_fast_api -h localhost
+psql -U user -d sheetflow_db -h localhost
 ```
 🔹 **Replace:**  
 - `user` → Your **database username**.  
-- `hng_fast_api` → Your **database name**.  
+- `sheetflow_db` → Your **database name**.  
 
 ✅ **Example:**  
 ```sh
-psql -U fastapi_user -d fastapi_db -h localhost
+psql -U sheetflow_user -d sheetflow_db -h localhost
 ```
 
 ## **Step 6: Run database migrations**  
@@ -143,23 +145,40 @@ psql -U fastapi_user -d fastapi_db -h localhost
    alembic revision --autogenerate -m 'your migration message'
    alembic upgrade head
    ```
-## **Step 8: Seed dummy data**  
-   ```sh
-   python3 seed.py
-   ```
 
 ---
 
-## **Adding Tables and Columns**  
+## **API Endpoints**  
 
-1. **After creating new tables or modifying models**:  
-   - Run Alembic migrations:  
-     ```sh
-     alembic revision --autogenerate -m "Migration message"
-     alembic upgrade head
-     ```
-   - Ensure you **import new models** into `api/v1/models/__init__.py`.  
-   - You do NOT need to manually import them in `alembic/env.py`.
+### **Templates**
+- `POST /api/v1/templates/create` - Create a new template
+- `GET /api/v1/templates/{template_id}` - Get a template by ID
+- `GET /api/v1/templates` - Get all templates
+- `DELETE /api/v1/templates/{template_id}` - Delete a template
+
+### **Rows**
+- `POST /api/v1/rows/create` - Create a new row
+- `POST /api/v1/rows/batch` - Create multiple rows in a batch
+- `PUT /api/v1/rows/{row_id}` - Update a row
+- `DELETE /api/v1/rows/{row_id}` - Delete a row
+- `GET /api/v1/rows/sheet/{template_id}/{sheet_no}` - Get all rows for a sheet
+- `GET /api/v1/rows/excel_download/{template_id}` - Download data as Excel file
+
+### **Authentication**
+- `POST /api/v1/auth/register` - Register a new user
+- `POST /api/v1/auth/login` - Login a user
+
+---
+
+## **Excel Export Functionality**  
+
+SheetFlow provides functionality to export data to Excel files with proper formatting:
+
+- Headers are formatted with bold text, text wrapping, and a gray background
+- Column widths are set for better readability
+- Data is organized by sheets as defined in the template
+
+The Excel export endpoint (`GET /api/v1/rows/excel_download/{template_id}`) generates a temporary Excel file that is automatically cleaned up after the response is sent to the client.
 
 ---
 
@@ -192,24 +211,6 @@ From the **project root directory**, run:
 pytest
 ```
 This will automatically discover and execute all test files in the `tests/` directory.
-
-### **Run tests in a specific directory**  
-To run tests in a specific model directory (e.g., `tests/v1/user/`):  
-```sh
-pytest tests/v1/user/
-```
-
-### **Run a specific test file**  
-To run tests from a specific test file (e.g., `test_signup.py` inside `tests/v1/auth/`):  
-```sh
-pytest tests/v1/auth/test_signup.py
-```
-
-### **Run a specific test function**  
-If you want to run a specific test inside a file, use:  
-```sh
-pytest tests/v1/auth/test_signup.py::test_user_signup
-```
 
 ### **Run tests with detailed output**  
 For verbose output, add the `-v` flag:  
@@ -248,9 +249,16 @@ alembic revision --autogenerate -m 'your migration message'
 
 ---
 
-## **Contribution Guidelines**  
+## **Dependencies**  
 
-- **Test your endpoints and models** before pushing changes.  
-- **Push Alembic migrations** if database models are modified.  
-- Ensure your code **follows project standards** and **passes tests** before submitting a pull request.  
+The project relies on the following key dependencies:
+- **FastAPI** - Web framework
+- **SQLAlchemy** - ORM for database operations
+- **Alembic** - Database migrations
+- **Pandas** - Data manipulation
+- **XlsxWriter** - Excel file generation
+- **Pydantic** - Data validation
+- **Uvicorn** - ASGI server
+
+For a complete list of dependencies, see `requirements.txt`.
 
