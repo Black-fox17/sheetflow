@@ -4,10 +4,17 @@ from datetime import datetime, timedelta
 from api.v1.services.row import row_service
 from api.db.database import get_db
 from sqlalchemy.orm import Session
+import tempfile
+import os
 
 def generate_db_excel(db: Session, template_id:str, filename:str = "result.xlsx"):
+    # Create a temporary file
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx')
+    temp_file_path = temp_file.name
+    temp_file.close()
+    
     # Create a Pandas Excel writer using XlsxWriter as the engine
-    writer = pd.ExcelWriter(filename, engine='xlsxwriter')
+    writer = pd.ExcelWriter(temp_file_path, engine='xlsxwriter')
     result_data_db = row_service.fetch(db, template_id)
     print(result_data_db)
     
@@ -22,7 +29,6 @@ def generate_db_excel(db: Session, template_id:str, filename:str = "result.xlsx"
         'bg_color': '#D9D9D9',
         'border': 1
     })
-    
     # Process each sheet
     for sheet_name, data in result_data_db.items():
         df_data = pd.DataFrame(data)
@@ -39,4 +45,4 @@ def generate_db_excel(db: Session, template_id:str, filename:str = "result.xlsx"
     # Save the Excel file
     writer.close()
     
-    return filename
+    return temp_file_path
